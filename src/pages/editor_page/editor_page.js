@@ -8,7 +8,6 @@ import CodeEditor from "../../components/code_editor/code_editor";
 import { useParams } from "react-router-dom";
 import useWebRTC from "../../hooks/useWebRTC";
 import VideoPlayer from "../../components/video_player/video_player";
-// import vid from '../../VID20240408105000.mp4';
 
 export default function EditorPage() {
 
@@ -111,10 +110,12 @@ export default function EditorPage() {
         // socket.emit("join-room", roomId);
 
         socket.on("code-change", (newCode) => {
+            console.log('code-change got');
             setCode(newCode);
         });
 
         socket.on("cursor-change", ({ socketId, cursorData }) => {
+            console.log('code-change got');
             if (editorRef) {
                 const decoration = editorRef.deltaDecorations(
                     remoteCursors[socketId]?.decorations || [],
