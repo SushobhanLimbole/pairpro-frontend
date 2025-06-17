@@ -164,7 +164,7 @@ export default function EditorPage() {
             socket.off("cursor-change");
             socket.off("user-left");
         };
-    }, [editorRef, remoteCursors, roomId]);
+    });
 
     const runCode = async () => {
 
