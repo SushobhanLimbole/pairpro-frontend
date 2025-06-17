@@ -1,0 +1,29 @@
+.navbar {
+  background: rgba(33, 149, 243, 0.77);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.15);
+  flex-wrap: wrap;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  color: #ffffff;
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 500;
+}
+
+.roomTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #ffffff;
+}

@@ -1,0 +1,62 @@
+.outputPanel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1e1e1e;
+  color: #f1f1f1;
+  font-family: monospace;
+  min-height: 100px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+.resizeHandle {
+  height: 2px;
+  background-color: rgba(33, 149, 243, 0.77);
+  cursor: row-resize;
+  position: relative;
+}
+
+.outputHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid gray;
+}
+
+.outputTitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.outputClose {
+  cursor: pointer;
+  font-size: 2.2rem;
+  color: #bbb;
+  padding: 0.1rem 0.8rem;
+  border-radius: 4px;
+  transition: background 0.3s;
+  margin-right: 1rem;
+}
+
+.outputClose:hover {
+  background: #333;
+}
+
+.outputContent {
+  font-size: 1.6rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  overflow-y: auto;
+  flex-grow: 1;
+  white-space: pre-wrap;
+}

@@ -1,0 +1,46 @@
+.files {
+  padding: 0.5rem 1rem;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border-right: 1px solid gray;
+}
+
+.files h2 {
+  font-weight: 300;
+}
+
+.selectedFile {
+  width: 94%;
+  background-color: rgba(128, 128, 128, 0.525);
+  font-weight: 400;
+  padding: 0.2rem 0.5rem;
+  text-overflow: ellipsis;
+  border-radius: 5px;
+}
+
+.resizer {
+  width: 5px;
+  cursor: ew-resize;
+  background-color: #444;
+  height: 100vh;
+}
+
+.file {
+  width: 94%;
+  font-weight: 400;
+  padding: 0.2rem 0.5rem;
+  margin: 0.25rem 0;
+  text-overflow: ellipsis;
+}
+
+.file:hover {
+  background-color: gray;
+  border-radius: 5px;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: gray;
+  margin: 0.5rem 0;
+}

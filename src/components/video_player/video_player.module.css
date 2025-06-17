@@ -1,0 +1,83 @@
+.videoContainer {
+  position: relative;
+  flex: 1;
+  background-color: #1e1e1e;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.video {
+  object-fit: cover;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.screenActive {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  z-index: 20;
+}
+
+.screenInactive {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.remoteFull {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.remoteSmall {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 10rem;  
+  height: 7rem;  
+  z-index: 20;
+}
+
+.remoteHidden {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.localFull {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.localSmall {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 10rem;
+  height: 7rem;
+  z-index: 20;
+}
+
+.localHidden {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.localVideoBorder {
+  border: 2px solid white;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+}
