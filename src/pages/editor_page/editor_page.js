@@ -151,7 +151,7 @@ export default function EditorPage() {
 
             if (socketId === socket.id) return; // ignore own cursor
 
-            const decoration = editor.deltaDecorations(
+            const decoration = editorRef.deltaDecorations(
                 remoteCursors[socketId]?.decorations || [],
                 [{
                     range: new monaco.Range(
