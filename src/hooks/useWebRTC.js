@@ -103,9 +103,11 @@ export default function useWebRTC(roomId) {
         //   socket.connect();
         // }
         if (socket.connected) {
+          console.log('room joined emmit');
           socket.emit('join-room', { roomId });
         } else {
-          socket.once('connect', () => {
+          console.log('room joined emmit');
+          socket.once('connection', () => {
             socket.emit('join-room', { roomId });
           });
         }
