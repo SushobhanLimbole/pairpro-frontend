@@ -99,9 +99,9 @@ export default function useWebRTC(roomId) {
       try {
 
         socketRef.current = socket;
-        if (!socket.connected) {
-          socket.connect();
-        }
+        // if (!socket.connected) {
+        //   socket.connect();
+        // }
 
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localStreamRef.current = stream;
