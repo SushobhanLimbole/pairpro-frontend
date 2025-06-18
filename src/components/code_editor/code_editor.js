@@ -24,10 +24,7 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
             socket.emit("cursor-change", {
                 roomId,
                 socketId: socket.id,
-                cursorData: {
-                    position,
-                    // optional: add username/color for tracking
-                }
+                cursorData: position
             });
         });
 

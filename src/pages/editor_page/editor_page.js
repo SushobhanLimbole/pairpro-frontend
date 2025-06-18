@@ -156,10 +156,10 @@ export default function EditorPage() {
                     remoteCursors[socketId]?.decorations || [],
                     [{
                         range: new monaco.Range(
-                            cursorData.position.lineNumber,
-                            cursorData.position.column,
-                            cursorData.position.lineNumber,
-                            cursorData.position.column
+                            cursorData.lineNumber,
+                            cursorData.column,
+                            cursorData.lineNumber,
+                            cursorData.column
                         ),
                         options: {
                             className: "remote-cursor",
@@ -170,7 +170,7 @@ export default function EditorPage() {
                         },
                     }]
                 );
-                
+
                 setRemoteCursors((prev) => ({
                     ...prev,
                     [socketId]: { ...cursorData, decorations: decoration },
