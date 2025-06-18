@@ -111,10 +111,10 @@ export default function useWebRTC(roomId) {
         socketRef.current.emit('join-room', { roomId });
 
         // 🔁 Reconnect on socket connect (handles routing)
-        socket.on('connect', () => {
-          console.log('[Socket] Reconnected:', socket.id);
-          socket.emit('join-room', { roomId });
-        });
+        // socket.on('connect', () => {
+        //   console.log('[Socket] Reconnected:', socket.id);
+        //   socket.emit('join-room', { roomId });
+        // });
 
         socketRef.current.on('user-joined', ({ socketId }) => {
           console.log('[Signal] User joined:', socketId);
