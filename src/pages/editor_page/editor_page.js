@@ -114,13 +114,20 @@ export default function EditorPage() {
             socket.emit("join-room", roomId);
         }
 
-        socket.on("code-change", (newCode) => {
+        // socket.on("code-change", (newCode) => {
+        //     console.log('code-change got');
+        //     setCode(newCode);
+        // });
+
+        socket.on("code-change", ({ roomId, code }) => {
             console.log('code-change got');
-            setCode(newCode);
+            if (code.from === socket.id) return; // Skip own changes
+            editor.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
         });
 
+
         socket.on("cursor-change", ({ socketId, cursorData }) => {
-            console.log('code-change got');
+            console.log('cursor-change got');
             // if (editorRef) {
             //     const decoration = editorRef.deltaDecorations(
             //         remoteCursors[socketId]?.decorations || [],
@@ -150,32 +157,30 @@ export default function EditorPage() {
             // }
 
             if (socketId === socket.id) return; // ignore own cursor
-            if (editorRef) {
 
-                const decoration = editorRef.deltaDecorations(
-                    remoteCursors[socketId]?.decorations || [],
-                    [{
-                        range: new monaco.Range(
-                            cursorData.lineNumber,
-                            cursorData.column,
-                            cursorData.lineNumber,
-                            cursorData.column
-                        ),
-                        options: {
-                            className: "remote-cursor",
-                            after: {
-                                content: "\u00a0",
-                                inlineClassName: "remote-cursor-label",
-                            },
+            const decoration = editorRef.deltaDecorations(
+                remoteCursors[socketId]?.decorations || [],
+                [{
+                    range: new monaco.Range(
+                        cursorData.lineNumber,
+                        cursorData.column,
+                        cursorData.lineNumber,
+                        cursorData.column
+                    ),
+                    options: {
+                        className: "remote-cursor",
+                        after: {
+                            content: "\u00a0",
+                            inlineClassName: "remote-cursor-label",
                         },
-                    }]
-                );
+                    },
+                }]
+            );
 
-                setRemoteCursors((prev) => ({
-                    ...prev,
-                    [socketId]: { ...cursorData, decorations: decoration },
-                }));
-            }
+            setRemoteCursors((prev) => ({
+                ...prev,
+                [socketId]: { ...cursorData, decorations: decoration },
+            }));
 
         });
 

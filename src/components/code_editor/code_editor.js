@@ -13,21 +13,34 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         setRefEditor(editor);
 
         // Cursor sync
+        // 1
         // editor.onDidChangeCursorPosition(() => {
         //     const position = editor.getPosition();
         //     socket.emit("cursor-change", { roomId, cursorData: { position } });
         // });
 
-        editor.onDidChangeCursorPosition((e) => {
-            const position = e.position;
+        // 2
+        // editor.onDidChangeCursorPosition((e) => {
+        //     const position = e.position;
 
-            socket.emit("cursor-change", {
+        //     socket.emit("cursor-change", {
+        //         roomId,
+        //         socketId: socket.id,
+        //         cursorData: position
+        //     });
+        // });
+
+        // 3
+        editor.onDidChangeModelContent((event) => {
+            const changes = event.changes;
+            socket.emit("code-change", {
                 roomId,
-                socketId: socket.id,
-                cursorData: position
+                code: {
+                    from: socket.id,
+                    changes: changes
+                }
             });
         });
-
 
         // Python completion
         monaco.languages.register({ id: "python" });
