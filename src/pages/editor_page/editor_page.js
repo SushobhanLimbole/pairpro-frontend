@@ -64,8 +64,8 @@ export default function EditorPage() {
         setPanelHeight(height);
     }
 
-    const pageRef = useRef(null); 
-    const videoRef = useRef(null); 
+    const pageRef = useRef(null);
+    const videoRef = useRef(null);
 
     const [pos, setPos] = useState({ x: 100, y: 100 });
     const dragging = useRef(false);
@@ -108,6 +108,11 @@ export default function EditorPage() {
     useEffect(() => {
 
         // socket.emit("join-room", roomId);
+
+        if (!socket.connected) {
+            socket.connect();
+            socket.emit("join-room", roomId);
+        }
 
         socket.on("code-change", (newCode) => {
             console.log('code-change got');
@@ -164,7 +169,7 @@ export default function EditorPage() {
             socket.off("cursor-change");
             socket.off("user-left");
         };
-    });
+    },[roomId, editorRef, remoteCursors]);
 
     const runCode = async () => {
 
@@ -245,7 +250,7 @@ export default function EditorPage() {
                     toggleFullScreen={() => { }}
                     isScreenSharing={isScreenSharing}
                     isRemoteConnected={isRemoteConnected}
-                /> 
+                />
                 { /* <video
                     src={vid}
                     width="320"
