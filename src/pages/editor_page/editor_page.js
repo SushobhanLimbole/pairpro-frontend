@@ -121,33 +121,59 @@ export default function EditorPage() {
 
         socket.on("cursor-change", ({ socketId, cursorData }) => {
             console.log('code-change got');
-            if (editorRef) {
-                const decoration = editorRef.deltaDecorations(
-                    remoteCursors[socketId]?.decorations || [],
-                    [
-                        {
-                            range: new monaco.Range(
-                                cursorData.position.lineNumber,
-                                cursorData.position.column,
-                                cursorData.position.lineNumber,
-                                cursorData.position.column
-                            ),
-                            options: {
-                                className: "remote-cursor",
-                                after: {
-                                    content: "\u00a0",
-                                    inlineClassName: "remote-cursor-label",
-                                },
-                            },
-                        },
-                    ]
-                );
+            // if (editorRef) {
+            //     const decoration = editorRef.deltaDecorations(
+            //         remoteCursors[socketId]?.decorations || [],
+            //         [
+            //             {
+            //                 range: new monaco.Range(
+            //                     cursorData.position.lineNumber,
+            //                     cursorData.position.column,
+            //                     cursorData.position.lineNumber,
+            //                     cursorData.position.column
+            //                 ),
+            //                 options: {
+            //                     className: "remote-cursor",
+            //                     after: {
+            //                         content: "\u00a0",
+            //                         inlineClassName: "remote-cursor-label",
+            //                     },
+            //                 },
+            //             },
+            //         ]
+            //     );
 
-                setRemoteCursors((prev) => ({
-                    ...prev,
-                    [socketId]: { ...cursorData, decorations: decoration },
-                }));
-            }
+            //     setRemoteCursors((prev) => ({
+            //         ...prev,
+            //         [socketId]: { ...cursorData, decorations: decoration },
+            //     }));
+            // }
+
+            if (socketId === socket.id) return; // ignore own cursor
+
+            const decoration = editor.deltaDecorations(
+                remoteCursors[socketId]?.decorations || [],
+                [{
+                    range: new monaco.Range(
+                        cursorData.position.lineNumber,
+                        cursorData.position.column,
+                        cursorData.position.lineNumber,
+                        cursorData.position.column
+                    ),
+                    options: {
+                        className: "remote-cursor",
+                        after: {
+                            content: "\u00a0",
+                            inlineClassName: "remote-cursor-label",
+                        },
+                    },
+                }]
+            );
+
+            setRemoteCursors((prev) => ({
+                ...prev,
+                [socketId]: { ...cursorData, decorations: decoration },
+            }));
         });
 
         socket.on("user-left", (socketId) => {
@@ -169,7 +195,7 @@ export default function EditorPage() {
             socket.off("cursor-change");
             socket.off("user-left");
         };
-    },[roomId, editorRef, remoteCursors]);
+    }, [roomId, editorRef, remoteCursors]);
 
     const runCode = async () => {
 

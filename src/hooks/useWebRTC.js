@@ -97,7 +97,7 @@ export default function useWebRTC(roomId) {
   useEffect(() => {
     const start = async () => {
       try {
-        
+
         socketRef.current = socket;
         if (!socket.connected) {
           socket.connect();
@@ -109,6 +109,12 @@ export default function useWebRTC(roomId) {
 
         console.log('[Join] Joining room:', roomId);
         socketRef.current.emit('join-room', { roomId });
+
+        // 🔁 Reconnect on socket connect (handles routing)
+        socket.on('connect', () => {
+          console.log('[Socket] Reconnected:', socket.id);
+          socket.emit('join-room', { roomId });
+        });
 
         socketRef.current.on('user-joined', ({ socketId }) => {
           console.log('[Signal] User joined:', socketId);

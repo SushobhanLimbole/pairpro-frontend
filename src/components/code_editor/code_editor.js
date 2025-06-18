@@ -13,10 +13,24 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         setRefEditor(editor);
 
         // Cursor sync
-        editor.onDidChangeCursorPosition(() => {
-            const position = editor.getPosition();
-            socket.emit("cursor-change", { roomId, cursorData: { position } });
+        // editor.onDidChangeCursorPosition(() => {
+        //     const position = editor.getPosition();
+        //     socket.emit("cursor-change", { roomId, cursorData: { position } });
+        // });
+
+        editor.onDidChangeCursorPosition((e) => {
+            const position = e.position;
+
+            socket.emit("cursor-change", {
+                roomId,
+                socketId: socket.id,
+                cursorData: {
+                    position,
+                    // optional: add username/color for tracking
+                }
+            });
         });
+
 
         // Python completion
         monaco.languages.register({ id: "python" });
