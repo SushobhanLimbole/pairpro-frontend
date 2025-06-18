@@ -150,30 +150,33 @@ export default function EditorPage() {
             // }
 
             if (socketId === socket.id) return; // ignore own cursor
+            if (editorRef) {
 
-            const decoration = editorRef.deltaDecorations(
-                remoteCursors[socketId]?.decorations || [],
-                [{
-                    range: new monaco.Range(
-                        cursorData.position.lineNumber,
-                        cursorData.position.column,
-                        cursorData.position.lineNumber,
-                        cursorData.position.column
-                    ),
-                    options: {
-                        className: "remote-cursor",
-                        after: {
-                            content: "\u00a0",
-                            inlineClassName: "remote-cursor-label",
+                const decoration = editorRef.deltaDecorations(
+                    remoteCursors[socketId]?.decorations || [],
+                    [{
+                        range: new monaco.Range(
+                            cursorData.position.lineNumber,
+                            cursorData.position.column,
+                            cursorData.position.lineNumber,
+                            cursorData.position.column
+                        ),
+                        options: {
+                            className: "remote-cursor",
+                            after: {
+                                content: "\u00a0",
+                                inlineClassName: "remote-cursor-label",
+                            },
                         },
-                    },
-                }]
-            );
+                    }]
+                );
+                
+                setRemoteCursors((prev) => ({
+                    ...prev,
+                    [socketId]: { ...cursorData, decorations: decoration },
+                }));
+            }
 
-            setRemoteCursors((prev) => ({
-                ...prev,
-                [socketId]: { ...cursorData, decorations: decoration },
-            }));
         });
 
         socket.on("user-left", (socketId) => {
