@@ -110,15 +110,15 @@ export default function EditorPage() {
 
         // socket.emit("join-room", roomId);
 
-        // if (!socket.connected) {
-        //     socket.connect();
-        //     socket.emit("join-room", roomId);
-        // }
+        if (!socket.connected) {
+            socket.connect();
+            socket.emit("join-room", roomId);
+        }
 
-        // socket.on("code-change", (newCode) => {
-        //     console.log('code-change got');
-        //     setCode(newCode);
-        // });
+        socket.on("code-change", (newCode) => {
+            console.log('code-change got');
+            setCode(newCode);
+        });
 
         // socket.on("code-change", ({ roomId, code }) => {
         //     console.log('code-change got');

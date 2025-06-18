@@ -14,21 +14,21 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
 
         // Cursor sync
         // 1
-        // editor.onDidChangeCursorPosition(() => {
-        //     const position = editor.getPosition();
-        //     socket.emit("cursor-change", { roomId, cursorData: { position } });
-        // });
+        editor.onDidChangeCursorPosition(() => {
+            const position = editor.getPosition();
+            socket.emit("cursor-change", { roomId, cursorData: { position } });
+        });
 
         // 2
-        // editor.onDidChangeCursorPosition((e) => {
-        //     const position = e.position;
+        editor.onDidChangeCursorPosition((e) => {
+            const position = e.position;
 
-        //     socket.emit("cursor-change", {
-        //         roomId,
-        //         socketId: socket.id,
-        //         cursorData: position
-        //     });
-        // });
+            socket.emit("cursor-change", {
+                roomId,
+                socketId: socket.id,
+                cursorData: position
+            });
+        });
 
         // 3
         // editor.onDidChangeModelContent((event) => {
@@ -62,37 +62,37 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         //     });
         // });
 
-        editor.onDidChangeModelContent((event) => {
-            const changes = event.changes.map(change => ({
-                range: {
-                    startLineNumber: change.range.startLineNumber,
-                    startColumn: change.range.startColumn,
-                    endLineNumber: change.range.endLineNumber,
-                    endColumn: change.range.endColumn,
-                },
-                text: change.text,
-            }));
+        // editor.onDidChangeModelContent((event) => {
+        //     const changes = event.changes.map(change => ({
+        //         range: {
+        //             startLineNumber: change.range.startLineNumber,
+        //             startColumn: change.range.startColumn,
+        //             endLineNumber: change.range.endLineNumber,
+        //             endColumn: change.range.endColumn,
+        //         },
+        //         text: change.text,
+        //     }));
 
-            socket.emit("code-change", {
-                roomId,
-                code: {
-                    from: socket.id,
-                    changes
-                }
-            });
-        });
+        //     socket.emit("code-change", {
+        //         roomId,
+        //         code: {
+        //             from: socket.id,
+        //             changes
+        //         }
+        //     });
+        // });
 
 
-        editor.onDidChangeCursorPosition((e) => {
-            socket.emit("cursor-change", {
-                socketId: socket.id,
-                cursorData: {
-                    lineNumber: e.position.lineNumber,
-                    column: e.position.column
-                },
-                roomId,
-            });
-        });
+        // editor.onDidChangeCursorPosition((e) => {
+        //     socket.emit("cursor-change", {
+        //         socketId: socket.id,
+        //         cursorData: {
+        //             lineNumber: e.position.lineNumber,
+        //             column: e.position.column
+        //         },
+        //         roomId,
+        //     });
+        // });
 
 
         // Python completion

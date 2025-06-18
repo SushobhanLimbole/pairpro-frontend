@@ -99,17 +99,8 @@ export default function useWebRTC(roomId) {
       try {
 
         socketRef.current = socket;
-        // if (!socket.connected) {
-        //   socket.connect();
-        // }
-        if (socket.connected) {
-          console.log('room joined emmit');
-          socket.emit('join-room', { roomId });
-        } else {
-          console.log('room joined emmit');
-          socket.once('connection', () => {
-            socket.emit('join-room', { roomId });
-          });
+        if (!socket.connected) {
+          socket.connect();
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -207,8 +198,8 @@ export default function useWebRTC(roomId) {
     start();
 
     return () => {
-      // console.log('[Cleanup] Leaving room');
-      // socketRef.current?.disconnect();
+      console.log('[Cleanup] Leaving room');
+      socketRef.current?.disconnect();
       cleanupPeer();
       localStreamRef.current?.getTracks().forEach(t => t.stop());
       screenStreamRef.current?.getTracks().forEach(t => t.stop());
