@@ -42,25 +42,46 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         //     });
         // });
 
+        // editor.onDidChangeModelContent((event) => {
+        //     const changes = event.changes.map(change => ({
+        //         range: {
+        //             startLineNumber: change.range.startLineNumber,
+        //             startColumn: change.range.startColumn,
+        //             endLineNumber: change.range.endLineNumber,
+        //             endColumn: change.range.endColumn
+        //         },
+        //         text: change.text
+        //     }));
+
+        //     socket.emit("code-change", {
+        //         roomId,
+        //         code: {
+        //             from: socket.id,
+        //             changes: changes
+        //         }
+        //     });
+        // });
+
         editor.onDidChangeModelContent((event) => {
             const changes = event.changes.map(change => ({
                 range: {
                     startLineNumber: change.range.startLineNumber,
                     startColumn: change.range.startColumn,
                     endLineNumber: change.range.endLineNumber,
-                    endColumn: change.range.endColumn
+                    endColumn: change.range.endColumn,
                 },
-                text: change.text
+                text: change.text,
             }));
 
             socket.emit("code-change", {
                 roomId,
                 code: {
                     from: socket.id,
-                    changes: changes
+                    changes
                 }
             });
         });
+
 
         editor.onDidChangeCursorPosition((e) => {
             socket.emit("cursor-change", {

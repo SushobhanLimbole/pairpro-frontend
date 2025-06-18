@@ -110,10 +110,10 @@ export default function EditorPage() {
 
         // socket.emit("join-room", roomId);
 
-        if (!socket.connected) {
-            socket.connect();
-            socket.emit("join-room", roomId);
-        }
+        // if (!socket.connected) {
+        //     socket.connect();
+        //     socket.emit("join-room", roomId);
+        // }
 
         // socket.on("code-change", (newCode) => {
         //     console.log('code-change got');
@@ -126,19 +126,19 @@ export default function EditorPage() {
         //     editorRef.current?.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
         // });
 
-        socket.on("code-change", ({ code }) => {
-            console.log('code-change got');
-            if (!editorRef.current) return;
-            if (code.from === socket.id) return;
+        // socket.on("code-change", ({ code }) => {
+        //     console.log('code-change got');
+        //     if (!editorRef.current) return;
+        //     if (code.from === socket.id) return;
 
-            const edits = code.changes.map(change => ({
-                range: monaco.Range.lift(change.range),
-                text: change.text,
-                forceMoveMarkers: true
-            }));
+        //     const edits = code.changes.map(change => ({
+        //         range: monaco.Range.lift(change.range),
+        //         text: change.text,
+        //         forceMoveMarkers: true
+        //     }));
 
-            editorRef.current?.executeEdits(null, edits);
-        });
+        //     editorRef.current?.executeEdits(null, edits);
+        // });
 
 
         socket.on("cursor-change", ({ socketId, cursorData }) => {
@@ -219,6 +219,32 @@ export default function EditorPage() {
             socket.off("user-left");
         };
     }, [roomId, editorRef, remoteCursors]);
+
+    useEffect(() => {
+        const handleCodeChange = ({ code }) => {
+            if (code.from === socket.id || !editorRef.current) return;
+
+            const edits = code.changes.map(change => ({
+                range: new monaco.Range(
+                    change.range.startLineNumber,
+                    change.range.startColumn,
+                    change.range.endLineNumber,
+                    change.range.endColumn
+                ),
+                text: change.text,
+                forceMoveMarkers: true
+            }));
+
+            editorRef.current.executeEdits(null, edits);
+        };
+
+        socket.on('code-change', handleCodeChange);
+
+        return () => {
+            socket.off('code-change', handleCodeChange);
+        };
+    }, []);
+
 
     const runCode = async () => {
 
