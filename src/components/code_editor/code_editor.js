@@ -31,8 +31,28 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         // });
 
         // 3
+        // editor.onDidChangeModelContent((event) => {
+        //     const changes = event.changes;
+        //     socket.emit("code-change", {
+        //         roomId,
+        //         code: {
+        //             from: socket.id,
+        //             changes: changes
+        //         }
+        //     });
+        // });
+
         editor.onDidChangeModelContent((event) => {
-            const changes = event.changes;
+            const changes = event.changes.map(change => ({
+                range: {
+                    startLineNumber: change.range.startLineNumber,
+                    startColumn: change.range.startColumn,
+                    endLineNumber: change.range.endLineNumber,
+                    endColumn: change.range.endColumn
+                },
+                text: change.text
+            }));
+
             socket.emit("code-change", {
                 roomId,
                 code: {
@@ -41,6 +61,18 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
                 }
             });
         });
+
+        editor.onDidChangeCursorPosition((e) => {
+            socket.emit("cursor-change", {
+                socketId: socket.id,
+                cursorData: {
+                    lineNumber: e.position.lineNumber,
+                    column: e.position.column
+                },
+                roomId,
+            });
+        });
+
 
         // Python completion
         monaco.languages.register({ id: "python" });

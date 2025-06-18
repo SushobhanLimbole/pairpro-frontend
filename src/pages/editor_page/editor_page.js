@@ -12,7 +12,8 @@ import VideoPlayer from "../../components/video_player/video_player";
 export default function EditorPage() {
 
     const { roomId } = useParams();
-    const [editorRef, setEditorRef] = useState(null);
+    // const [editorRef, setEditorRef] = useState(null);
+    const editorRef = useRef(null);
     const [remoteCursors, setRemoteCursors] = useState({});
     const [code, setCode] = useState("// Write code here...");
     const [outputPanel, setOutputPanel] = useState(false);
@@ -41,7 +42,7 @@ export default function EditorPage() {
 
     const setRefEditor = (editor) => {
         console.log('set editor called');
-        setEditorRef(editor);
+        // setEditorRef(editor);
     }
 
     const handleLanguage = (lang) => {
@@ -119,10 +120,24 @@ export default function EditorPage() {
         //     setCode(newCode);
         // });
 
-        socket.on("code-change", ({ roomId, code }) => {
+        // socket.on("code-change", ({ roomId, code }) => {
+        //     console.log('code-change got');
+        //     if (code.from === socket.id) return; // Skip own changes
+        //     editorRef.current?.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
+        // });
+
+        socket.on("code-change", ({ code }) => {
             console.log('code-change got');
-            if (code.from === socket.id) return; // Skip own changes
-            editorRef.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
+            if (!editorRef.current) return;
+            if (code.from === socket.id) return;
+
+            const edits = code.changes.map(change => ({
+                range: monaco.Range.lift(change.range),
+                text: change.text,
+                forceMoveMarkers: true
+            }));
+
+            editorRef.current?.executeEdits(null, edits);
         });
 
 
@@ -301,7 +316,7 @@ export default function EditorPage() {
                 language={language}
                 roomId={roomId}
                 handleCode={handleCode}
-                setRefEditor={setRefEditor}
+                setRefEditor={(editor) => editorRef.current = editor} // ✅ Store editor in .current
                 outputPanel={outputPanel}
                 socket={socket}
             />
