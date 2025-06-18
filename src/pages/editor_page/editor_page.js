@@ -122,7 +122,7 @@ export default function EditorPage() {
         socket.on("code-change", ({ roomId, code }) => {
             console.log('code-change got');
             if (code.from === socket.id) return; // Skip own changes
-            editor.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
+            editorRef.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
         });
 
 
