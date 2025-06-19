@@ -586,6 +586,136 @@ export default function useWebRTC(roomId) {
     }
   }, []);
 
+  // useEffect(() => {
+  //   const start = async () => {
+  //     try {
+  //       console.log('[Init] Starting WebRTC setup...');
+  //       if (!socket.connected) {
+  //         console.log('[Socket] Not connected, connecting...');
+  //         socket.connect();
+  //       }
+
+  //       console.log('[Socket] Emitting join-room for room:', roomId);
+  //       socket.emit('join-room', { roomId });
+
+  //       try {
+  //         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  //         localStreamRef.current = stream;
+  //         if (localVideoRef.current) {
+  //           localVideoRef.current.srcObject = stream;
+  //           console.log('[Media] Local video stream set');
+  //         }
+  //       } catch (err) {
+  //         console.error('[Media] Failed to get user media:', err);
+  //         alert("Unable to access camera or mic. Please check browser permissions.");
+  //         return;
+  //       }
+
+  //       socket.on('user-joined', async ({ socketId }) => {
+  //         console.log('[Signal] user-joined received:', socketId);
+  //         if (peerRef.current) {
+  //           console.warn('[Signal] Already have peer connection');
+  //           return;
+  //         }
+
+  //         peerRef.current = createPeerConnection(socketId);
+  //         localStreamRef.current.getTracks().forEach(track => {
+  //           console.log('[Track] Adding local track to peer:', track.kind);
+  //           peerRef.current.addTrack(track, localStreamRef.current);
+  //         });
+
+  //         const offer = await peerRef.current.createOffer();
+  //         await peerRef.current.setLocalDescription(offer);
+  //         console.log('[Offer] Sending offer to:', socketId);
+
+  //         socket.emit('send-offer', {
+  //           offer: peerRef.current.localDescription,
+  //           to: socketId,
+  //         });
+  //       });
+
+  //       socket.on('receive-offer', async ({ offer, from }) => {
+  //         console.log('[Signal] receive-offer from:', from);
+  //         if (peerRef.current) {
+  //           console.warn('[Signal] Already have peer connection');
+  //           return;
+  //         }
+
+  //         peerRef.current = createPeerConnection(from);
+  //         localStreamRef.current.getTracks().forEach(track => {
+  //           console.log('[Track] Adding local track for offer handling:', track.kind);
+  //           peerRef.current.addTrack(track, localStreamRef.current);
+  //         });
+
+  //         await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+  //         console.log('[Offer] Remote description set');
+
+  //         const answer = await peerRef.current.createAnswer();
+  //         await peerRef.current.setLocalDescription(answer);
+  //         console.log('[Answer] Sending answer to:', from);
+
+  //         socket.emit('send-answer', {
+  //           answer: peerRef.current.localDescription,
+  //           to: from,
+  //         });
+
+  //         for (const candidate of pendingCandidates.current) {
+  //           console.log('[ICE] Applying buffered candidate:', candidate);
+  //           await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+  //         }
+  //         pendingCandidates.current = [];
+  //       });
+
+  //       socket.on('receive-answer', async ({ answer }) => {
+  //         console.log('[Signal] receive-answer received');
+  //         if (peerRef.current) {
+  //           await peerRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+  //           console.log('[Answer] Remote description set');
+  //         }
+  //       });
+
+  //       socket.on('receive-ice-candidate', async ({ candidate }) => {
+  //         console.log('[ICE] Received candidate from peer');
+  //         if (peerRef.current && peerRef.current.remoteDescription) {
+  //           try {
+  //             await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+  //             console.log('[ICE] Candidate added');
+  //           } catch (err) {
+  //             console.error('[ICE] Error adding candidate:', err);
+  //           }
+  //         } else {
+  //           console.log('[ICE] Remote description not set, buffering candidate');
+  //           pendingCandidates.current.push(candidate);
+  //         }
+  //       });
+
+  //       socket.on('user-left', ({ socketId }) => {
+  //         console.log('[Signal] user-left:', socketId);
+  //         cleanupPeer();
+  //       });
+
+  //     } catch (err) {
+  //       console.error('[Init] WebRTC error:', err);
+  //     }
+  //   };
+
+  //   start();
+
+  //   return () => {
+  //     console.log('[Cleanup] useWebRTC cleanup');
+  //     socket.emit("leave-room", { roomId });
+  //     cleanupPeer();
+  //     localStreamRef.current?.getTracks().forEach(t => t.stop());
+  //     screenStreamRef.current?.getTracks().forEach(t => t.stop());
+
+  //     socket.off('user-joined');
+  //     socket.off('receive-offer');
+  //     socket.off('receive-answer');
+  //     socket.off('receive-ice-candidate');
+  //     socket.off('user-left');
+  //   };
+  // }, [roomId, createPeerConnection, cleanupPeer]);
+
   useEffect(() => {
     const start = async () => {
       try {
@@ -598,25 +728,24 @@ export default function useWebRTC(roomId) {
         console.log('[Socket] Emitting join-room for room:', roomId);
         socket.emit('join-room', { roomId });
 
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          localStreamRef.current = stream;
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-            console.log('[Media] Local video stream set');
-          }
-        } catch (err) {
-          console.error('[Media] Failed to get user media:', err);
-          alert("Unable to access camera or mic. Please check browser permissions.");
-          return;
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStreamRef.current = stream;
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+          console.log('[Media] Local video stream set');
         }
 
-        socket.on('user-joined', async ({ socketId }) => {
+        let alreadyHandledJoin = false;
+
+        // 👇 Save new peers to connect if received later
+        const handleUserJoined = async ({ socketId }) => {
           console.log('[Signal] user-joined received:', socketId);
           if (peerRef.current) {
             console.warn('[Signal] Already have peer connection');
             return;
           }
+
+          alreadyHandledJoin = true;
 
           peerRef.current = createPeerConnection(socketId);
           localStreamRef.current.getTracks().forEach(track => {
@@ -632,7 +761,16 @@ export default function useWebRTC(roomId) {
             offer: peerRef.current.localDescription,
             to: socketId,
           });
-        });
+        };
+
+        socket.on('user-joined', handleUserJoined);
+
+        // 👇 After short delay, simulate offer if no one connected you
+        setTimeout(() => {
+          if (!peerRef.current && !alreadyHandledJoin) {
+            console.log('[Timeout] No peer joined. Waiting for offer instead.');
+          }
+        }, 3000);
 
         socket.on('receive-offer', async ({ offer, from }) => {
           console.log('[Signal] receive-offer from:', from);
@@ -715,6 +853,7 @@ export default function useWebRTC(roomId) {
       socket.off('user-left');
     };
   }, [roomId, createPeerConnection, cleanupPeer]);
+
 
   return {
     localVideoRef,
