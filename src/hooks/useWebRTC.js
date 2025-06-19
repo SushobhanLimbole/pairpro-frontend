@@ -382,7 +382,7 @@ export default function useWebRTC(roomId) {
         // });
 
         
-        socketRef.current.on('receive-offer', async ({ offer, from }) => {
+        socket.current.on('receive-offer', async ({ offer, from }) => {
           console.log('[Offer] Received offer from:', from);
           if (peerRef.current) return;
 
