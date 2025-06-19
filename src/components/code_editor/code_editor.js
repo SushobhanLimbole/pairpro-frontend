@@ -12,30 +12,66 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         // Store ref
         setRefEditor(editor);
 
+        // editor.onDidChangeModelContent((event) => {
+        //     console.log('code change emmit');
+
+        //     const changes = event.changes.map(change => ({
+        //         range: {
+        //             startLineNumber: change.range.startLineNumber,
+        //             startColumn: change.range.startColumn,
+        //             endLineNumber: change.range.endLineNumber,
+        //             endColumn: change.range.endColumn
+        //         },
+        //         text: change.text
+        //     }));
+
+        //     console.log(changes);
+
+
+        //     socket.emit("code-change", {
+        //         roomId,
+        //         code: {
+        //             from: socket.id,
+        //             changes: changes
+        //         }
+        //     });
+        // });
+
         editor.onDidChangeModelContent((event) => {
-            console.log('code change emmit');
-            
+            console.log('on code change emmit')
             const changes = event.changes.map(change => ({
                 range: {
                     startLineNumber: change.range.startLineNumber,
                     startColumn: change.range.startColumn,
                     endLineNumber: change.range.endLineNumber,
-                    endColumn: change.range.endColumn
+                    endColumn: change.range.endColumn,
                 },
-                text: change.text
+                text: change.text,
             }));
 
             console.log(changes);
             
 
-            socket.emit("code-change", {
+            socket.emit('code-change', {
                 roomId,
                 code: {
                     from: socket.id,
-                    changes: changes
-                }
+                    changes,
+                },
             });
         });
+
+        editor.onDidChangeCursorPosition((e) => {
+            const position = e.position;
+            socket.emit('cursor-change', {
+                roomId,
+                cursorData: {
+                    lineNumber: position.lineNumber,
+                    column: position.column,
+                },
+            });
+        });
+
 
 
         // Cursor sync

@@ -268,11 +268,7 @@ export default function EditorPage() {
     // }, []);
 
     useEffect(() => {
-        socket.emit("join-room", roomId);
-
         const handleCodeChange = ({ code }) => {
-            console.log('handle code change');
-            
             if (code.from === socket.id || !editorRef.current) return;
 
             const edits = code.changes.map(change => ({
@@ -283,7 +279,7 @@ export default function EditorPage() {
                     change.range.endColumn
                 ),
                 text: change.text,
-                forceMoveMarkers: true
+                forceMoveMarkers: true,
             }));
 
             editorRef.current.executeEdits(null, edits);
@@ -291,7 +287,6 @@ export default function EditorPage() {
 
         const handleCursorChange = ({ socketId, cursorData }) => {
             if (socketId === socket.id || !editorRef.current) return;
-
             const decoration = editorRef.current.deltaDecorations(
                 remoteCursors[socketId]?.decorations || [],
                 [{
@@ -299,7 +294,7 @@ export default function EditorPage() {
                         cursorData.lineNumber,
                         cursorData.column,
                         cursorData.lineNumber,
-                        cursorData.column
+                        cursorData.column,
                     ),
                     options: {
                         className: "remote-cursor",
@@ -317,7 +312,7 @@ export default function EditorPage() {
             }));
         };
 
-        const handleUserLeft = (socketId) => {
+        const handleUserLeft = ({ socketId }) => {
             if (remoteCursors[socketId]?.decorations) {
                 editorRef.current?.deltaDecorations(remoteCursors[socketId].decorations, []);
                 setRemoteCursors(prev => {
@@ -338,6 +333,7 @@ export default function EditorPage() {
             socket.off("user-left", handleUserLeft);
         };
     }, [roomId]);
+
 
 
     const runCode = async () => {
