@@ -268,72 +268,76 @@ export default function EditorPage() {
     // }, []);
 
     useEffect(() => {
-        const handleCodeChange = ({ code }) => {
-            if (code.from === socket.id || !editorRef.current) return;
+        const handleCodeChange = (data) => {
+            console.log("[RECEIVED] code-change:", data);
 
-            const edits = code.changes.map(change => ({
+            const code = data?.code !== undefined ? data.code : data;
+            if (!code || code.from === socket.id || !editorRef.current) {
+                console.log("[SKIP] code-change from self or invalid");
+                return;
+            }
+
+            const edits = code.changes.map(c => ({
                 range: new monaco.Range(
-                    change.range.startLineNumber,
-                    change.range.startColumn,
-                    change.range.endLineNumber,
-                    change.range.endColumn
+                    c.range.startLineNumber,
+                    c.range.startColumn,
+                    c.range.endLineNumber,
+                    c.range.endColumn
                 ),
-                text: change.text,
-                forceMoveMarkers: true,
+                text: c.text,
+                forceMoveMarkers: true
             }));
 
+            console.log("[APPLY] Executing edits:", edits);
             editorRef.current.executeEdits(null, edits);
         };
 
-        const handleCursorChange = ({ socketId, cursorData }) => {
+        socket.off("code-change", handleCodeChange);
+        socket.on("code-change", handleCodeChange);
+
+        return () => {
+            socket.off("code-change", handleCodeChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleCursor = (data) => {
+            const { socketId, cursorData } = data;
+            console.log("[RECEIVED] cursor-change from", socketId, ":", cursorData);
+
             if (socketId === socket.id || !editorRef.current) return;
-            const decoration = editorRef.current.deltaDecorations(
+
+            const deco = editorRef.current.deltaDecorations(
                 remoteCursors[socketId]?.decorations || [],
                 [{
                     range: new monaco.Range(
                         cursorData.lineNumber,
                         cursorData.column,
                         cursorData.lineNumber,
-                        cursorData.column,
+                        cursorData.column
                     ),
                     options: {
                         className: "remote-cursor",
-                        after: {
-                            content: "\u00a0",
-                            inlineClassName: "remote-cursor-label",
-                        },
-                    },
+                        after: { content: "\u00a0", inlineClassName: "remote-cursor-label" }
+                    }
                 }]
             );
 
+            console.log(`[UPDATE] Cursor decorations for ${socketId}:`, deco);
+
             setRemoteCursors(prev => ({
                 ...prev,
-                [socketId]: { ...cursorData, decorations: decoration },
+                [socketId]: { cursorData, decorations: deco }
             }));
         };
 
-        const handleUserLeft = ({ socketId }) => {
-            if (remoteCursors[socketId]?.decorations) {
-                editorRef.current?.deltaDecorations(remoteCursors[socketId].decorations, []);
-                setRemoteCursors(prev => {
-                    const updated = { ...prev };
-                    delete updated[socketId];
-                    return updated;
-                });
-            }
-        };
-
-        socket.on("code-change", handleCodeChange);
-        socket.on("cursor-change", handleCursorChange);
-        socket.on("user-left", handleUserLeft);
+        socket.off("cursor-change", handleCursor);
+        socket.on("cursor-change", handleCursor);
 
         return () => {
-            socket.off("code-change", handleCodeChange);
-            socket.off("cursor-change", handleCursorChange);
-            socket.off("user-left", handleUserLeft);
+            socket.off("cursor-change", handleCursor);
         };
-    }, [roomId]);
-
+    }, [editorRef, remoteCursors]);
 
 
     const runCode = async () => {

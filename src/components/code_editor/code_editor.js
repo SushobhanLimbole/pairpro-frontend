@@ -37,40 +37,58 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         //     });
         // });
 
-        editor.onDidChangeModelContent((event) => {
-            console.log('on code change emmit')
-            const changes = event.changes.map(change => ({
+        editor.onDidChangeModelContent((e) => {
+            const changes = e.changes.map(change => ({
                 range: {
                     startLineNumber: change.range.startLineNumber,
                     startColumn: change.range.startColumn,
                     endLineNumber: change.range.endLineNumber,
-                    endColumn: change.range.endColumn,
+                    endColumn: change.range.endColumn
                 },
-                text: change.text,
+                text: change.text
             }));
 
-            console.log(changes);
-            
-
-            socket.emit('code-change', {
+            const payload = {
                 roomId,
                 code: {
                     from: socket.id,
-                    changes,
-                },
-            });
+                    changes
+                }
+            };
+
+            console.log("[EMIT] code-change:", payload);
+
+            socket.emit("code-change", payload);
         });
 
+
+        // editor.onDidChangeCursorPosition((e) => {
+        //     const position = e.position;
+        //     socket.emit('cursor-change', {
+        //         roomId,
+        //         cursorData: {
+        //             lineNumber: position.lineNumber,
+        //             column: position.column,
+        //         },
+        //     });
+        // });
+
         editor.onDidChangeCursorPosition((e) => {
-            const position = e.position;
-            socket.emit('cursor-change', {
+            const cursorData = {
+                lineNumber: e.position.lineNumber,
+                column: e.position.column
+            };
+
+            const payload = {
                 roomId,
-                cursorData: {
-                    lineNumber: position.lineNumber,
-                    column: position.column,
-                },
-            });
+                cursorData
+            };
+
+            console.log("[EMIT] cursor-change:", payload);
+
+            socket.emit("cursor-change", payload);
         });
+
 
 
 
