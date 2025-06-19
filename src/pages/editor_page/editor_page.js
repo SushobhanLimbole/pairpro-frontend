@@ -40,10 +40,10 @@ export default function EditorPage() {
         return versions[lang] || "3.10.0";
     };
 
-    const setRefEditor = (editor) => {
-        console.log('set editor called');
-        // setEditorRef(editor);
-    }
+    // const setRefEditor = (editor) => {
+    //     console.log('set editor called');
+    //     // setEditorRef(editor);
+    // }
 
     const handleLanguage = (lang) => {
         console.log('handle lang called ', lang);
@@ -116,10 +116,29 @@ export default function EditorPage() {
             socket.emit("join-room", roomId);
         }
 
-        socket.on("code-change", (newCode) => {
-            console.log('code-change got');
-            setCode(newCode);
+        // socket.on("code-change", (newCode) => {
+        //     console.log('code-change got');
+        //     setCode(newCode);
+        // });
+
+        socket.on("code-change", ({ code }) => {
+            if (!editorRef.current) return;
+            if (code.from === socket.id) return;
+
+            const edits = code.changes.map(change => ({
+                range: new monaco.Range(
+                    change.range.startLineNumber,
+                    change.range.startColumn,
+                    change.range.endLineNumber,
+                    change.range.endColumn
+                ),
+                text: change.text,
+                forceMoveMarkers: true
+            }));
+
+            editorRef.current.executeEdits(null, edits);
         });
+
 
         // socket.on("code-change", ({ roomId, code }) => {
         //     console.log('code-change got');

@@ -12,6 +12,27 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         // Store ref
         setRefEditor(editor);
 
+        editor.onDidChangeModelContent((event) => {
+            const changes = event.changes.map(change => ({
+                range: {
+                    startLineNumber: change.range.startLineNumber,
+                    startColumn: change.range.startColumn,
+                    endLineNumber: change.range.endLineNumber,
+                    endColumn: change.range.endColumn
+                },
+                text: change.text
+            }));
+
+            socket.emit("code-change", {
+                roomId,
+                code: {
+                    from: socket.id,
+                    changes: changes
+                }
+            });
+        });
+
+
         // Cursor sync
         // 1
         // editor.onDidChangeCursorPosition(() => {
@@ -196,7 +217,7 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
             value={code}
             onChange={(value) => {
                 handleCode(value || "");
-                socket.emit("code-change", { roomId, code: value });
+                // socket.emit("code-change", { roomId, code: value });
             }}
             onMount={(edit, mon) => mountLanguages(edit, mon)}
             options={{
