@@ -14,10 +14,10 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
 
         // Cursor sync
         // 1
-        editor.onDidChangeCursorPosition(() => {
-            const position = editor.getPosition();
-            socket.emit("cursor-change", { roomId, cursorData: { position } });
-        });
+        // editor.onDidChangeCursorPosition(() => {
+        //     const position = editor.getPosition();
+        //     socket.emit("cursor-change", { roomId, cursorData: { position } });
+        // });
 
         // 2
         editor.onDidChangeCursorPosition((e) => {

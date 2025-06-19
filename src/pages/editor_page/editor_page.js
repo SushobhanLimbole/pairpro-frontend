@@ -111,6 +111,7 @@ export default function EditorPage() {
         // socket.emit("join-room", roomId);
 
         if (!socket.connected) {
+            console.log('socket conncect editor');
             socket.connect();
             socket.emit("join-room", roomId);
         }

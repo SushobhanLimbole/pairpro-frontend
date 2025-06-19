@@ -100,6 +100,7 @@ export default function useWebRTC(roomId) {
 
         socketRef.current = socket;
         if (!socket.connected) {
+          console.log('socket conncect rtc');
           socket.connect();
         }
 
