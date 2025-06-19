@@ -106,24 +106,174 @@ export default function EditorPage() {
     };
 
 
+    // useEffect(() => {
+
+    //     // socket.emit("join-room", roomId);
+
+    //     if (!socket.connected) {
+    //         console.log('socket conncect editor');
+    //         socket.connect();
+    //         socket.emit("join-room", roomId);
+    //     }
+
+    //     // socket.on("code-change", (newCode) => {
+    //     //     console.log('code-change got');
+    //     //     setCode(newCode);
+    //     // });
+
+    //     socket.on("code-change", ({ code }) => {
+    //         console.log('code change listen');
+
+    //         if (!editorRef.current) return;
+    //         if (code.from === socket.id) return;
+
+    //         const edits = code.changes.map(change => ({
+    //             range: new monaco.Range(
+    //                 change.range.startLineNumber,
+    //                 change.range.startColumn,
+    //                 change.range.endLineNumber,
+    //                 change.range.endColumn
+    //             ),
+    //             text: change.text,
+    //             forceMoveMarkers: true
+    //         }));
+
+    //         editorRef.current.executeEdits(null, edits);
+    //     });
+
+
+    //     // socket.on("code-change", ({ roomId, code }) => {
+    //     //     console.log('code-change got');
+    //     //     if (code.from === socket.id) return; // Skip own changes
+    //     //     editorRef.current?.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
+    //     // });
+
+    //     // socket.on("code-change", ({ code }) => {
+    //     //     console.log('code-change got');
+    //     //     if (!editorRef.current) return;
+    //     //     if (code.from === socket.id) return;
+
+    //     //     const edits = code.changes.map(change => ({
+    //     //         range: monaco.Range.lift(change.range),
+    //     //         text: change.text,
+    //     //         forceMoveMarkers: true
+    //     //     }));
+
+    //     //     editorRef.current?.executeEdits(null, edits);
+    //     // });
+
+
+    //     socket.on("cursor-change", ({ socketId, cursorData }) => {
+    //         console.log('cursor-change got');
+    //         // if (editorRef) {
+    //         //     const decoration = editorRef.deltaDecorations(
+    //         //         remoteCursors[socketId]?.decorations || [],
+    //         //         [
+    //         //             {
+    //         //                 range: new monaco.Range(
+    //         //                     cursorData.position.lineNumber,
+    //         //                     cursorData.position.column,
+    //         //                     cursorData.position.lineNumber,
+    //         //                     cursorData.position.column
+    //         //                 ),
+    //         //                 options: {
+    //         //                     className: "remote-cursor",
+    //         //                     after: {
+    //         //                         content: "\u00a0",
+    //         //                         inlineClassName: "remote-cursor-label",
+    //         //                     },
+    //         //                 },
+    //         //             },
+    //         //         ]
+    //         //     );
+
+    //         //     setRemoteCursors((prev) => ({
+    //         //         ...prev,
+    //         //         [socketId]: { ...cursorData, decorations: decoration },
+    //         //     }));
+    //         // }
+
+    //         if (socketId === socket.id) return; // ignore own cursor
+
+    //         const decoration = editorRef.deltaDecorations(
+    //             remoteCursors[socketId]?.decorations || [],
+    //             [{
+    //                 range: new monaco.Range(
+    //                     cursorData.lineNumber,
+    //                     cursorData.column,
+    //                     cursorData.lineNumber,
+    //                     cursorData.column
+    //                 ),
+    //                 options: {
+    //                     className: "remote-cursor",
+    //                     after: {
+    //                         content: "\u00a0",
+    //                         inlineClassName: "remote-cursor-label",
+    //                     },
+    //                 },
+    //             }]
+    //         );
+
+    //         setRemoteCursors((prev) => ({
+    //             ...prev,
+    //             [socketId]: { ...cursorData, decorations: decoration },
+    //         }));
+
+    //     });
+
+    //     socket.on("user-left", (socketId) => {
+    //         if (editorRef && remoteCursors[socketId]?.decorations) {
+    //             editorRef.deltaDecorations(remoteCursors[socketId].decorations, []);
+    //             setRemoteCursors((prev) => {
+    //                 const updated = { ...prev };
+    //                 delete updated[socketId];
+    //                 return updated;
+    //             });
+    //         }
+    //     });
+
+    //     console.log(code);
+
+
+    //     return () => {
+    //         socket.off("code-change");
+    //         socket.off("cursor-change");
+    //         socket.off("user-left");
+    //     };
+    // }, [roomId, editorRef, remoteCursors]);
+
+    // useEffect(() => {
+    //     const handleCodeChange = ({ code }) => {
+    //         if (code.from === socket.id || !editorRef.current) return;
+
+    //         const edits = code.changes.map(change => ({
+    //             range: new monaco.Range(
+    //                 change.range.startLineNumber,
+    //                 change.range.startColumn,
+    //                 change.range.endLineNumber,
+    //                 change.range.endColumn
+    //             ),
+    //             text: change.text,
+    //             forceMoveMarkers: true
+    //         }));
+
+    //         editorRef.current.executeEdits(null, edits);
+    //     };
+
+    //     socket.on('code-change', handleCodeChange);
+
+    //     return () => {
+    //         socket.off('code-change', handleCodeChange);
+    //     };
+    // }, []);
+
     useEffect(() => {
+        socket.emit("join-room", roomId);
 
-        // socket.emit("join-room", roomId);
-
-        if (!socket.connected) {
-            console.log('socket conncect editor');
-            socket.connect();
-            socket.emit("join-room", roomId);
-        }
-
-        // socket.on("code-change", (newCode) => {
-        //     console.log('code-change got');
-        //     setCode(newCode);
-        // });
-
-        socket.on("code-change", ({ code }) => {
-            if (!editorRef.current) return;
-            if (code.from === socket.id) return;
+        const handleCodeChange = ({ code }) => {
+            console.log('handle code change');
+            
+            if (code.from === socket.id || !editorRef.current) return;
 
             const edits = code.changes.map(change => ({
                 range: new monaco.Range(
@@ -137,63 +287,12 @@ export default function EditorPage() {
             }));
 
             editorRef.current.executeEdits(null, edits);
-        });
+        };
 
+        const handleCursorChange = ({ socketId, cursorData }) => {
+            if (socketId === socket.id || !editorRef.current) return;
 
-        // socket.on("code-change", ({ roomId, code }) => {
-        //     console.log('code-change got');
-        //     if (code.from === socket.id) return; // Skip own changes
-        //     editorRef.current?.executeEdits(null, code.changes); // This preserves cursor and doesn't overwrite
-        // });
-
-        // socket.on("code-change", ({ code }) => {
-        //     console.log('code-change got');
-        //     if (!editorRef.current) return;
-        //     if (code.from === socket.id) return;
-
-        //     const edits = code.changes.map(change => ({
-        //         range: monaco.Range.lift(change.range),
-        //         text: change.text,
-        //         forceMoveMarkers: true
-        //     }));
-
-        //     editorRef.current?.executeEdits(null, edits);
-        // });
-
-
-        socket.on("cursor-change", ({ socketId, cursorData }) => {
-            console.log('cursor-change got');
-            // if (editorRef) {
-            //     const decoration = editorRef.deltaDecorations(
-            //         remoteCursors[socketId]?.decorations || [],
-            //         [
-            //             {
-            //                 range: new monaco.Range(
-            //                     cursorData.position.lineNumber,
-            //                     cursorData.position.column,
-            //                     cursorData.position.lineNumber,
-            //                     cursorData.position.column
-            //                 ),
-            //                 options: {
-            //                     className: "remote-cursor",
-            //                     after: {
-            //                         content: "\u00a0",
-            //                         inlineClassName: "remote-cursor-label",
-            //                     },
-            //                 },
-            //             },
-            //         ]
-            //     );
-
-            //     setRemoteCursors((prev) => ({
-            //         ...prev,
-            //         [socketId]: { ...cursorData, decorations: decoration },
-            //     }));
-            // }
-
-            if (socketId === socket.id) return; // ignore own cursor
-
-            const decoration = editorRef.deltaDecorations(
+            const decoration = editorRef.current.deltaDecorations(
                 remoteCursors[socketId]?.decorations || [],
                 [{
                     range: new monaco.Range(
@@ -212,58 +311,33 @@ export default function EditorPage() {
                 }]
             );
 
-            setRemoteCursors((prev) => ({
+            setRemoteCursors(prev => ({
                 ...prev,
                 [socketId]: { ...cursorData, decorations: decoration },
             }));
+        };
 
-        });
-
-        socket.on("user-left", (socketId) => {
-            if (editorRef && remoteCursors[socketId]?.decorations) {
-                editorRef.deltaDecorations(remoteCursors[socketId].decorations, []);
-                setRemoteCursors((prev) => {
+        const handleUserLeft = (socketId) => {
+            if (remoteCursors[socketId]?.decorations) {
+                editorRef.current?.deltaDecorations(remoteCursors[socketId].decorations, []);
+                setRemoteCursors(prev => {
                     const updated = { ...prev };
                     delete updated[socketId];
                     return updated;
                 });
             }
-        });
+        };
 
-        console.log(code);
-
+        socket.on("code-change", handleCodeChange);
+        socket.on("cursor-change", handleCursorChange);
+        socket.on("user-left", handleUserLeft);
 
         return () => {
-            socket.off("code-change");
-            socket.off("cursor-change");
-            socket.off("user-left");
+            socket.off("code-change", handleCodeChange);
+            socket.off("cursor-change", handleCursorChange);
+            socket.off("user-left", handleUserLeft);
         };
-    }, [roomId, editorRef, remoteCursors]);
-
-    useEffect(() => {
-        const handleCodeChange = ({ code }) => {
-            if (code.from === socket.id || !editorRef.current) return;
-
-            const edits = code.changes.map(change => ({
-                range: new monaco.Range(
-                    change.range.startLineNumber,
-                    change.range.startColumn,
-                    change.range.endLineNumber,
-                    change.range.endColumn
-                ),
-                text: change.text,
-                forceMoveMarkers: true
-            }));
-
-            editorRef.current.executeEdits(null, edits);
-        };
-
-        socket.on('code-change', handleCodeChange);
-
-        return () => {
-            socket.off('code-change', handleCodeChange);
-        };
-    }, []);
+    }, [roomId, remoteCursors]);
 
 
     const runCode = async () => {
