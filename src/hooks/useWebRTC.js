@@ -231,8 +231,8 @@ export default function useWebRTC(roomId) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const screenVideoRef = useRef(null);
-  const socketRef = useRef(null); //
-  const stream = useRef(null);  //
+  // const socketRef = useRef(null); //
+  // const stream = useRef(null);  //
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const screenStreamRef = useRef(null);
@@ -381,13 +381,17 @@ export default function useWebRTC(roomId) {
         //   pendingCandidates.current = [];
         // });
 
-        
-        socket.current.on('receive-offer', async ({ offer, from }) => {
+
+        socket.on('receive-offer', async ({ offer, from }) => {
           console.log('[Offer] Received offer from:', from);
           if (peerRef.current) return;
 
           peerRef.current = createPeerConnection(from);
-          stream.getTracks().forEach(track => peerRef.current.addTrack(track, stream));
+          // stream.getTracks().forEach(track => peerRef.current.addTrack(track, stream));
+          localStreamRef.current.getTracks().forEach(track => {
+            peerRef.current.addTrack(track, localStreamRef.current);
+          });
+
 
           await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
           console.log('[Offer] Set remote description');
@@ -396,7 +400,7 @@ export default function useWebRTC(roomId) {
           await peerRef.current.setLocalDescription(answer);
           console.log('[Answer] Sending answer to:', from);
 
-          socketRef.current.emit('send-answer', {
+          socket.emit('send-answer', {
             answer: peerRef.current.localDescription,
             to: from,
           });
