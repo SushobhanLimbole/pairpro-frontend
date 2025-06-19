@@ -231,6 +231,8 @@ export default function useWebRTC(roomId) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const screenVideoRef = useRef(null);
+  const socketRef = useRef(null); //
+  const stream = useRef(null);  //
   const peerRef = useRef(null);
   const localStreamRef = useRef(null);
   const screenStreamRef = useRef(null);
@@ -354,26 +356,54 @@ export default function useWebRTC(roomId) {
           });
         });
 
-        socket.on('receive-offer', async ({ offer, from }) => {
+        // socket.on('receive-offer', async ({ offer, from }) => {
+        //   console.log('[Offer] Received offer from:', from);
+        //   if (peerRef.current) return;
+
+        //   peerRef.current = createPeerConnection(from);
+        //   localStreamRef.current.getTracks().forEach(track => {
+        //     peerRef.current.addTrack(track, localStreamRef.current);
+        //   });
+
+        //   await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+        //   const answer = await peerRef.current.createAnswer();
+        //   await peerRef.current.setLocalDescription(answer);
+
+        //   console.log('[Answer] Sending answer to:', from);
+        //   socket.emit('send-answer', {
+        //     answer: peerRef.current.localDescription,
+        //     to: from,
+        //   });
+
+        //   for (const candidate of pendingCandidates.current) {
+        //     await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        //   }
+        //   pendingCandidates.current = [];
+        // });
+
+        
+        socketRef.current.on('receive-offer', async ({ offer, from }) => {
           console.log('[Offer] Received offer from:', from);
           if (peerRef.current) return;
 
           peerRef.current = createPeerConnection(from);
-          localStreamRef.current.getTracks().forEach(track => {
-            peerRef.current.addTrack(track, localStreamRef.current);
-          });
+          stream.getTracks().forEach(track => peerRef.current.addTrack(track, stream));
 
           await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+          console.log('[Offer] Set remote description');
+
           const answer = await peerRef.current.createAnswer();
           await peerRef.current.setLocalDescription(answer);
-
           console.log('[Answer] Sending answer to:', from);
-          socket.emit('send-answer', {
+
+          socketRef.current.emit('send-answer', {
             answer: peerRef.current.localDescription,
             to: from,
           });
 
+          // Apply any buffered ICE candidates
           for (const candidate of pendingCandidates.current) {
+            console.log('[ICE] Applying buffered candidate:', candidate);
             await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
           }
           pendingCandidates.current = [];
