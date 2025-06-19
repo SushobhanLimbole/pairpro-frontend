@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import useWebRTC from '../../hooks/useWebRTC';
 import VideoPlayer from '../../components/video_player/video_player';
-import { FaSlideshare, FaPhoneSlash, FaVolumeUp, FaVolumeMute, FaMicrophoneSlash, FaMicrophone, FaEllipsisV } from 'react-icons/fa';
+import { FaSlideshare, FaPhoneSlash, FaMicrophoneSlash, FaMicrophone, FaEllipsisV } from 'react-icons/fa';
 import styles from './room_page.module.css';
 import VideoNavbar from '../../components/video_navbar/video_navbar';
+import { useWebRTCContext } from '../../utils/webRTC_context';
 
 export default function RoomPage() {
 
@@ -14,13 +14,20 @@ export default function RoomPage() {
   const {
     localVideoRef,
     remoteVideoRef,
+    screenVideoRef,
     toggleAudio,
     shareScreen,
     muted,
-    screenVideoRef,
+    disconnectCall,
     isScreenSharing,
     isRemoteConnected,
-  } = useWebRTC(roomId);
+    joinRoom
+  } = useWebRTCContext();
+
+
+  useEffect(() => {
+    joinRoom(roomId); // Only call once
+  }, [roomId]);
 
   const [isScreenFull, setIsScreenFull] = useState(false);
 
@@ -76,16 +83,16 @@ export default function RoomPage() {
           </button>
 
           <button
-            onClick={() => navigate('/')}
+            onClick={() => {
+              disconnectCall();
+              navigate('/');
+            }}
             className={`${styles.controlButton} ${styles.endCallButton}`}
           >
             <FaPhoneSlash />
           </button>
 
           <button
-            // style={{
-            //   backgroundColor: menuOpen ? 'rgba(33, 149, 243, 0.77)' : 'gray'
-            // }}
             onClick={() => setMenuOpen(!menuOpen)}
             className={styles.menuButton}
           >
