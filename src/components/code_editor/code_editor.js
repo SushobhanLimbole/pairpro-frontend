@@ -13,6 +13,8 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         setRefEditor(editor);
 
         editor.onDidChangeModelContent((event) => {
+            console.log('code change emmit');
+            
             const changes = event.changes.map(change => ({
                 range: {
                     startLineNumber: change.range.startLineNumber,
@@ -22,6 +24,9 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
                 },
                 text: change.text
             }));
+
+            console.log(changes);
+            
 
             socket.emit("code-change", {
                 roomId,
