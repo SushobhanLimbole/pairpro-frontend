@@ -37,7 +37,39 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
         //     });
         // });
 
+        // editor.onDidChangeModelContent((e) => {
+        //     const changes = e.changes.map(change => ({
+        //         range: {
+        //             startLineNumber: change.range.startLineNumber,
+        //             startColumn: change.range.startColumn,
+        //             endLineNumber: change.range.endLineNumber,
+        //             endColumn: change.range.endColumn
+        //         },
+        //         text: change.text
+        //     }));
+
+        //     const payload = {
+        //         roomId,
+        //         code: {
+        //             from: socket.id,
+        //             changes
+        //         }
+        //     };
+
+        //     console.log("[EMIT] code-change:", payload);
+
+        //     socket.emit("code-change", payload);
+        // });
+
+        let suppressChange = false;
+
         editor.onDidChangeModelContent((e) => {
+            if (suppressChange) {
+                console.log("[SKIP] Suppressing change from remote edit");
+                suppressChange = false;
+                return;
+            }
+
             const changes = e.changes.map(change => ({
                 range: {
                     startLineNumber: change.range.startLineNumber,
@@ -57,9 +89,13 @@ export default function CodeEditor({ handleCode, setRefEditor, language, code, s
             };
 
             console.log("[EMIT] code-change:", payload);
-
             socket.emit("code-change", payload);
         });
+
+        // Allow EditorPage to access suppressChange
+        window.setEditorSuppressChange = (value) => {
+            suppressChange = value;
+        };
 
 
         // editor.onDidChangeCursorPosition((e) => {

@@ -268,28 +268,56 @@ export default function EditorPage() {
     // }, []);
 
     useEffect(() => {
-        const handleCodeChange = (data) => {
-            console.log("[RECEIVED] code-change:", data);
+        // const handleCodeChange = (data) => {
+        //     console.log("[RECEIVED] code-change:", data);
 
-            const code = data?.code !== undefined ? data.code : data;
-            if (!code || code.from === socket.id || !editorRef.current) {
-                console.log("[SKIP] code-change from self or invalid");
-                return;
-            }
+        //     const code = data?.code !== undefined ? data.code : data;
+        //     if (!code || code.from === socket.id || !editorRef.current) {
+        //         console.log("[SKIP] code-change from self or invalid");
+        //         return;
+        //     }
 
-            const edits = code.changes.map(c => ({
-                range: new monaco.Range(
-                    c.range.startLineNumber,
-                    c.range.startColumn,
-                    c.range.endLineNumber,
-                    c.range.endColumn
-                ),
-                text: c.text,
-                forceMoveMarkers: true
-            }));
+        //     const edits = code.changes.map(c => ({
+        //         range: new monaco.Range(
+        //             c.range.startLineNumber,
+        //             c.range.startColumn,
+        //             c.range.endLineNumber,
+        //             c.range.endColumn
+        //         ),
+        //         text: c.text,
+        //         forceMoveMarkers: true
+        //     }));
 
-            console.log("[APPLY] Executing edits:", edits);
-            editorRef.current.executeEdits(null, edits);
+        //     console.log("[APPLY] Executing edits:", edits);
+        //     editorRef.current.executeEdits(null, edits);
+
+
+            const handleCodeChange = (data) => {
+                const code = data?.code || data;
+                console.log("[RECEIVED] code-change:", code);
+
+                if (!code || code.from === socket.id || !editorRef.current) {
+                    console.log("[SKIP] code-change from self or invalid");
+                    return;
+                }
+
+                const edits = code.changes.map(c => ({
+                    range: new monaco.Range(
+                        c.range.startLineNumber,
+                        c.range.startColumn,
+                        c.range.endLineNumber,
+                        c.range.endColumn
+                    ),
+                    text: c.text,
+                    forceMoveMarkers: true
+                }));
+
+                console.log("[APPLY] Executing remote edits:", edits);
+
+                // Suppress triggering emitter on apply
+                window.setEditorSuppressChange(true);
+                editorRef.current.executeEdits(null, edits);
+
         };
 
         socket.off("code-change", handleCodeChange);
