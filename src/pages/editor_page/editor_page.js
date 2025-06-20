@@ -47,15 +47,12 @@ export default function EditorPage() {
         return versions[lang] || "3.10.0";
     };
 
-    // const setRefEditor = (editor) => {
-    //     console.log('set editor called');
-    //     // setEditorRef(editor);
-    // }
-
     const handleLanguage = (lang) => {
         console.log('handle lang called ', lang);
         setLanguage(lang);
-    }
+        socket.emit('language-change', { language: lang, roomId });
+    };
+
 
     const handleOutputPanel = (op) => {
         console.log('handle output panel called ', op);
@@ -111,6 +108,18 @@ export default function EditorPage() {
     const handleMouseUp = () => {
         dragging.current = false;
     };
+
+    useEffect(() => {
+        socket.on('get-language', (language) => {
+            console.log('[Language] Language received:', language);
+            setLanguage(language); // or handle accordingly
+        });
+
+        return () => {
+            socket.off('get-language');
+        };
+    }, []);
+
 
     useEffect(() => {
 

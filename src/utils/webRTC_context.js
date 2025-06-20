@@ -108,6 +108,26 @@ export function WebRTCProvider({ children }) {
             socket.emit('join-room', { roomId });
             console.log('[WebRTC] Joined room:', roomId);
 
+            socket.emit('get-existing-peers', { roomId });
+            console.log('[WebRTC] get existing peers of the room:', roomId);
+
+            socket.on('existing-peers', async (peers) => {
+                console.log('existing peers listener called, got peers ',peers);
+                if (peers.length === 0) return;
+
+                const targetId = peers[0]; // For 1-to-1
+                if (peerRef.current) return;
+
+                peerRef.current = createPeerConnection(targetId);
+                stream.getTracks().forEach(track => peerRef.current.addTrack(track, stream));
+
+                const offer = await peerRef.current.createOffer();
+                await peerRef.current.setLocalDescription(offer);
+
+                socket.emit('send-offer', { offer: peerRef.current.localDescription, to: targetId });
+                console.log('send-offer emitted');
+            });
+
             socket.on('user-joined', async ({ socketId }) => {
                 if (peerRef.current) return;
 
@@ -161,7 +181,7 @@ export function WebRTCProvider({ children }) {
         }
     }, [createPeerConnection]);
 
-    const disconnectCall = useCallback(() => {
+    const disconnectCall = useCallback((roomId) => {
         console.log('[WebRTC] Disconnecting...');
 
         // Close peer connection
@@ -180,7 +200,7 @@ export function WebRTCProvider({ children }) {
         if (screenVideoRef.current) screenVideoRef.current.srcObject = null;
 
         // Optionally inform server
-        socket.emit('leave-room');
+        socket.emit('leave-room', { roomId });
 
         // Reset state
         hasJoinedRoom.current = false;
@@ -246,7 +266,7 @@ export function WebRTCProvider({ children }) {
                 isRemoteConnected,
                 localVideoRef,
                 remoteVideoRef,
-                screenVideoRef, 
+                screenVideoRef,
             }}
         >
             {children}

@@ -95,7 +95,7 @@ export default function RoomPage() {
 
           <button
             onClick={() => {
-              disconnectCall();
+              disconnectCall(roomId);
               navigate('/');
             }}
             className={`${styles.controlButton} ${styles.endCallButton}`}
