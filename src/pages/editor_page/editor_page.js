@@ -47,6 +47,11 @@ export default function EditorPage() {
         return versions[lang] || "3.10.0";
     };
 
+    // const setRefEditor = (editor) => {
+    //     console.log('set editor called');
+    //     // setEditorRef(editor);
+    // }
+
     const handleLanguage = (lang) => {
         console.log('handle lang called ', lang);
         setLanguage(lang);
@@ -107,11 +112,8 @@ export default function EditorPage() {
         dragging.current = false;
     };
 
-
-    
-
     useEffect(() => {
-        
+
         const handleCodeChange = (data) => {
             const code = data?.code || data;
             console.log("[RECEIVED] code-change:", code);

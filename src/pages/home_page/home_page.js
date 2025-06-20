@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import styles from './home_page.module.css';
 
 export default function HomePage() {
+    
     const navigate = useNavigate();
     const [roomCode, setRoomCode] = useState('');
 

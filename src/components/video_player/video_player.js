@@ -99,7 +99,7 @@ export default function VideoPlayer({
             : bothConnected
               ? styles.localSmall
               : styles.localHidden
-          }`}
+          } ${styles.mirror}`}
       />
     </div>
   );

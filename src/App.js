@@ -8,6 +8,9 @@ import { VideoProvider } from "./utils/video_context";
 import { WebRTCProvider } from './utils/webRTC_context';
 
 function App() {
+
+  console.log('App component called');
+
   return (
     <Router>
       <VideoProvider>
